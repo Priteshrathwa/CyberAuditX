@@ -1,0 +1,203 @@
+================================================================================
+           CyberAuditX - Data Flow Diagram (DFD) - All Levels
+================================================================================
+
+================================================================================
+DFD LEVEL 0: CONTEXT DIAGRAM (System Boundary View)
+================================================================================
+
+                          USER
+                           |
+          +-------- Scan Request ------+
+          |                            |
+          |                            V
+          |                   +-------------------+
+          |                   | CyberAuditX      |
+          |                   | System            |
+    Scan Results <--------+   +-------------------+
+                          |         |        |
+                          |         |        |
+                          |    Execute   Retrieve Results
+                          |    Commands       |
+                          |         |         V
+                          |         +---> Database/
+                          |              scan_results/
+                          V
+                    TARGET NETWORK
+
+Data Flows:
+  1. User -> System: Scan Request (target, scanner type)
+  2. System -> Network: Execute Commands (nmap/nikto/sqlmap)
+  3. Network -> System: Response Data (ports, vulnerabilities)
+  4. System -> Database: Save Results (JSON files)
+  5. Database -> System: Retrieve Results (load scan history)
+  6. System -> User: Display Analysis (formatted results)
+
+================================================================================
+DFD LEVEL 1: MAIN PROCESSES & DATA STORES
+================================================================================
+
+USER
+  |
+  +---> P1: Input Validation ---+
+        • Check format           |
+        • Normalize target       |
+                                 |
+                     Valid Target|
+                                 V
+                          P2: Execute Scanner
+                          • Nmap: nmap -sV
+                          • Nikto: nikto -h
+                          • SQLMap: sqlmap
+                                 |
+                      Raw Output |
+                                 V
+                          P3: Parse Results
+                          • Extract findings
+                          • Categorize severity
+                          • Create summary
+                      Parsed Data |
+                                 |
+         +----------+            |
+         |          |            V
+         V          +-----> D2: JSON Results
+      P4: AI         (save to disk)
+      Analysis           |
+      (Gemini)           |
+         ^               |
+         |       Retrieve|
+         +-------<-------+
+                  |
+                  V
+               P5: Export Report
+               • Format results
+               • Download/view
+                  |
+                  +------> USER (Display Analysis)
+
+Data Stores:
+  D1: Scan Cache (temporary results)
+  D2: JSON Results (persistent storage)
+
+================================================================================
+DFD LEVEL 2: DETAILED PROCESSES (P1-P5 Expansion)
+================================================================================
+
+P1: INPUT VALIDATION
+    Input: Target (URL/IP)
+    Process:
+      1. Parse input string
+      2. Extract hostname/port
+      3. Validate format
+      4. Check for special characters
+    Output: Valid Target or Error
+    Data Store: None
+
+P2: EXECUTE SCANNER
+    Input: Valid Target, Scanner Type
+    Process:
+      1. Select appropriate scanner
+      2. Build command string
+      3. Execute system command
+      4. Capture stdout/stderr
+      5. Monitor timeout
+      6. Store in cache
+    Output: Raw Command Output
+    Data Store: D1 (Scan Cache)
+
+P3: PARSE RESULTS
+    Input: Raw Command Output
+    Process:
+      1. Parse output format
+      2. Extract vulnerability data
+      3. Categorize by severity
+      4. Generate statistics
+      5. Create JSON structure
+    Output: Parsed Data, Save Signal
+    Data Store: D2 (JSON Results)
+
+P4: AI ANALYSIS
+    Input: Parsed Data (from D2)
+    Process:
+      1. Load scan results
+      2. Build analysis prompt
+      3. Call Google Gemini API
+      4. Extract JSON response
+      5. Parse and validate
+    Output: Analysis Results
+    Data Store: D2 (Read)
+
+P5: EXPORT REPORT
+    Input: Parsed Data + AI Analysis
+    Process:
+      1. Format results
+      2. Create output structure
+      3. Support multiple formats
+      4. Generate download link
+    Output: Report to User
+    Data Store: D2 (Read)
+
+================================================================================
+EXTERNAL ENTITIES
+================================================================================
+
+1. USER
+   - Initiates scans
+   - Reviews results
+   - Requests AI analysis
+   - Exports reports
+
+2. TARGET NETWORK
+   - Responds to scanner commands
+   - Provides vulnerability data
+   - Returns port/service information
+
+3. GOOGLE GEMINI API
+   - Receives analysis requests
+   - Returns AI-generated insights
+   - Provides vulnerability explanations
+
+================================================================================
+DATA FLOWS SUMMARY
+================================================================================
+
+Target Input:
+  User -> P1 -> P2
+
+Raw Output:
+  P2 -> P3
+
+Parsed Data:
+  P3 -> P4, P5, D2
+
+Analysis Results:
+  P4 -> P5
+
+Report:
+  P5 -> User
+
+Cache Data:
+  P2 <-> D1
+
+JSON Storage:
+  P3 -> D2
+  D2 -> P4
+  D2 -> P5
+
+================================================================================
+DATA STORE DEFINITIONS
+================================================================================
+
+D1: SCAN CACHE
+  Type: Memory/Temporary
+  Contains: Raw output from recent scans
+  Access: Read/Write by P2, P3
+  Retention: Session-based
+
+D2: JSON RESULTS
+  Type: Persistent File Storage (scan_results/)
+  Contains: Parsed findings, summary, metadata
+  Access: Write by P3, Read by P4/P5
+  Retention: Permanent
+
+================================================================================

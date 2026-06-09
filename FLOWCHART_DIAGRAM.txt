@@ -1,0 +1,233 @@
+================================================================================
+                    CyberAuditX - Complete Flowchart
+================================================================================
+
+                                  START
+                                    |
+                                    V
+                          +---------------------+
+                          | Open CyberAuditX    |
+                          | Web Application     |
+                          +---------------------+
+                                    |
+                                    V
+                          +---------------------+
+                          | Select Scan Type:   |
+                          | Nmap / Nikto /      |
+                          | SQLMap              |
+                          +---------------------+
+                                    |
+                                    V
+                          +---------------------+
+                          | Enter Target:       |
+                          | URL or IP Address   |
+                          +---------------------+
+                                    |
+                                    V
+                              +----------+
+                              | Valid?   |
+                              +----+-----+
+                                   |
+                         +---------+---------+
+                         |                   |
+                        NO                  YES
+                         |                   |
+                         V                   |
+                    +--------+               |
+                    | Error  |               |
+                    | Message|               |
+                    +--------+               |
+                         |                   |
+                         +-------+           |
+                                 |<----------+
+                                 V
+                          +---------------------+
+                          | Click Start Scan    |
+                          | Button              |
+                          +---------------------+
+                                    |
+                                    V
+                            +--------+-------+--------+
+                            | Which Scanner? |
+                            +---+---+---+---+---+---+
+                               /     |      \
+                         Nmap /      |       \ SQLMap
+                             /    Nikto \     \
+                            V        V       V
+                    +-------+   +-------+   +-------+
+                    | nmap  |   | nikto |   |sqlmap |
+                    | -sV   |   | -h    |   |--batch|
+                    +-------+   +-------+   +-------+
+                            \     |       /
+                             \    |      /
+                              V   V   V
+                          +---------------------+
+                          | Capture Command     |
+                          | Output              |
+                          +---------------------+
+                                    |
+                                    V
+                          +---------------------+
+                          | Parse Output:       |
+                          | Extract Findings    |
+                          +---------------------+
+                                    |
+                                    V
+                          +---------------------+
+                          | Categorize by       |
+                          | Severity Level      |
+                          +---------------------+
+                                    |
+                                    V
+                          +---------------------+
+                          | Save Results to     |
+                          | JSON File           |
+                          +---------------------+
+                                    |
+                                    V
+                          +---------------------+
+                          | Display Results     |
+                          | in Web Interface    |
+                          +---------------------+
+                                    |
+                                    V
+                          +---------------------+
+                          | User Reviews        |
+                          | Scan Results        |
+                          +---------------------+
+                                    |
+                                    V
+                            +-------+---------+
+                            | AI Analysis     |
+                            | Requested?      |
+                            +---+-------+-----+
+                               /         \
+                             YES         NO
+                             /             \
+                            V               |
+                      +-----------+         |
+                      | Build     |         |
+                      | Prompt    |         |
+                      +-----------+         |
+                            |              |
+                            V              |
+                      +-----------+         |
+                      | Call      |         |
+                      | Gemini API|         |
+                      +-----------+         |
+                            |              |
+                            V              |
+                      +-----------+         |
+                      | Extract   |         |
+                      | JSON      |         |
+                      +-----------+         |
+                            |              |
+                            V              |
+                      +-----------+         |
+                      | Parse &   |         |
+                      | Validate  |         |
+                      +-----------+         |
+                            |              |
+                            V              |
+                      +-----------+         |
+                      | Display   |         |
+                      | Analysis  |         |
+                      +-----------+         |
+                            |              |
+                            V              |
+                      +-----------+         |
+                      | Show:     |         |
+                      | Summary   |         |
+                      | Risks     |         |
+                      | Fixes     |         |
+                      +-----------+         |
+                            |              |
+                            +------+-------+
+                                   |
+                                   V
+                          +---------------------+
+                          | Export or Save      |
+                          | Report              |
+                          +---------------------+
+                                    |
+                                    V
+                            +-------+---------+
+                            | Another Scan    |
+                            | Needed?         |
+                            +---+-------+-----+
+                               /         \
+                             YES         NO
+                             /             \
+                            |               |
+                    (Loop to Select)      |
+                            |               |
+                            |               V
+                            |            [EXIT]
+                            |
+                    +--------+--------+
+                    | Return to       |
+                    | Scanner Type    |
+                    | Selection       |
+                    +--------+--------+
+                             |
+                             +---------> (Continue Loop)
+
+================================================================================
+                        KEY DECISION POINTS
+================================================================================
+
+1. INPUT VALIDATION
+   - Check for valid URL/IP format
+   - Reject if invalid, loop back to input
+
+2. SCANNER SELECTION
+   - Nmap: Network port scanning (nmap -sV)
+   - Nikto: Web vulnerability scanning (nikto -h)
+   - SQLMap: SQL injection testing (sqlmap --batch)
+
+3. AI ANALYSIS REQUEST
+   - Optional Google Gemini integration
+   - Provides intelligent security analysis
+   - Shows summary, risks, and recommendations
+
+4. ADDITIONAL SCANS
+   - Loop back to scanner selection
+   - Or exit application
+
+================================================================================
+                      PROCESS FLOW SUMMARY
+================================================================================
+
+INPUT PHASE:
+  • Application startup
+  • Scanner type selection
+  • Target input and validation
+
+EXECUTION PHASE:
+  • Execute appropriate scanner command
+  • Capture raw command output
+  • Monitor execution progress
+
+PROCESSING PHASE:
+  • Parse scanner output
+  • Extract vulnerability findings
+  • Categorize by severity
+  • Generate summary statistics
+
+DISPLAY PHASE:
+  • Load results in web interface
+  • Render interactive tables
+  • Show scan metadata
+
+ANALYSIS PHASE (Optional):
+  • Build security analysis prompt
+  • Call Google Gemini API
+  • Extract JSON response
+  • Display AI-generated insights
+
+EXPORT PHASE:
+  • Save vulnerability report
+  • Save findings to JSON
+  • Option to run additional scans
+
+================================================================================

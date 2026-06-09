@@ -1,0 +1,64 @@
+{
+    "scan_id": "scan_20260401231337",
+    "target": "http://testphp.vulnweb.com",
+    "timestamp": "2026-04-01 23:13:37",
+    "nmap": {
+        "scan_type": "service_version_scan",
+        "target": "testphp.vulnweb.com",
+        "timestamp": "2026-04-01 23:13:40",
+        "raw_output": "Starting Nmap 7.98 ( https://nmap.org ) at 2026-04-01 23:13 +0530\nNote: Host seems down. If it is really up, but blocking our ping probes, try -Pn\nNmap done: 1 IP address (0 hosts up) scanned in 3.27 seconds\n",
+        "ports": [],
+        "summary": {
+            "total_ports": 0,
+            "open_ports": 0
+        }
+    },
+    "sqlmap": {
+        "scan_type": "basic_scan",
+        "target": "http://testphp.vulnweb.com",
+        "timestamp": "2026-04-01 23:17:43",
+        "raw_output": "        ___\n       __H__\n ___ ___[,]_____ ___ ___  {1.10.2#stable}\n|_ -| . [']     | .'| . |\n|___|_  [(]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\n[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program\n\n[*] starting @ 23:13:42 /2026-04-01/\n\n[23:13:42] [INFO] testing connection to the target URL\n[23:14:42] [CRITICAL] connection timed out to the target URL. sqlmap is going to retry the request(s)\n[23:14:42] [WARNING] if the problem persists please check that the provided target URL is reachable. In case that it is, you can try to rerun with switch '--random-agent' and/or proxy switches ('--proxy', '--proxy-file'...)\n[23:17:42] [CRITICAL] connection timed out to the target URL\n\n[*] ending @ 23:17:42 /2026-04-01/\n\n",
+        "vulnerabilities": [],
+        "injections": [],
+        "databases": [],
+        "tables": [],
+        "summary": {
+            "is_vulnerable": false,
+            "injection_points": 0,
+            "database_type": "",
+            "total_databases": 0,
+            "total_tables": 0
+        }
+    },
+    "nikto": {
+        "scan_type": "nikto_scan",
+        "target": "http://testphp.vulnweb.com",
+        "timestamp": "2026-04-01 23:18:24",
+        "raw_output": "- Nikto v2.5.0\n---------------------------------------------------------------------------\n+ Multiple IPs found: 44.228.249.3, 64:ff9b::2ce4:f903\n---------------------------------------------------------------------------\n+ 0 host(s) tested\n",
+        "findings": [
+            {
+                "description": "Multiple IPs found: 44.228.249.3, 64:ff9b::2ce4:f903",
+                "severity": "info"
+            },
+            {
+                "description": "0 host(s) tested",
+                "severity": "info"
+            }
+        ],
+        "summary": {
+            "total_items_found": 2,
+            "server_info": "",
+            "target_ip": "",
+            "target_port": "",
+            "by_severity": {
+                "critical": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "info": 2
+            },
+            "total_findings": 2
+        }
+    },
+    "vulnerabilities": []
+}

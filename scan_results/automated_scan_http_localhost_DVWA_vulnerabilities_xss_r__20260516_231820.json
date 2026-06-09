@@ -1,0 +1,165 @@
+{
+    "scan_id": "scan_20260516231547",
+    "target": "http://localhost/DVWA/vulnerabilities/xss_r/",
+    "timestamp": "2026-05-16 23:15:47",
+    "nmap": {
+        "scan_type": "service_version_scan",
+        "target": "localhost",
+        "timestamp": "2026-05-16 23:15:53",
+        "raw_output": "Starting Nmap 7.99 ( https://nmap.org ) at 2026-05-16 23:15 +0530\nNmap scan report for localhost (127.0.0.1)\nHost is up (0.000044s latency).\nOther addresses for localhost (not scanned): ::1\nNot shown: 997 closed tcp ports (conn-refused)\nPORT     STATE SERVICE VERSION\n80/tcp   open  http    Apache httpd 2.4.67 ((Unix) PHP/8.5.6)\n3306/tcp open  mysql   MariaDB 12.2.2\n5000/tcp open  http    Werkzeug httpd 3.1.5 (Python 3.14.4)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 6.22 seconds\n",
+        "ports": [
+            {
+                "port": "80/tcp",
+                "state": "open",
+                "service": "http",
+                "version": "Apache httpd 2.4.67 ((Unix) PHP/8.5.6)"
+            },
+            {
+                "port": "3306/tcp",
+                "state": "open",
+                "service": "mysql",
+                "version": "MariaDB 12.2.2"
+            },
+            {
+                "port": "5000/tcp",
+                "state": "open",
+                "service": "http",
+                "version": "Werkzeug httpd 3.1.5 (Python 3.14.4)"
+            }
+        ],
+        "summary": {
+            "total_ports": 3,
+            "open_ports": 3
+        }
+    },
+    "sqlmap": {
+        "scan_type": "basic_scan",
+        "target": "http://localhost/DVWA/vulnerabilities/xss_r/",
+        "timestamp": "2026-05-16 23:15:55",
+        "raw_output": "        ___\n       __H__\n ___ ___[.]_____ ___ ___  {1.10.4#stable}\n|_ -| . [(]     | .'| . |\n|___|_  [(]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\n[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program\n\n[*] starting @ 23:15:54 /2026-05-16/\n\n[23:15:54] [WARNING] you've provided target URL without any GET parameters (e.g. 'http://www.site.com/article.php?id=1') and without providing any POST parameters through option '--data'\ndo you want to try URI injections in the target URL itself? [Y/n/q] Y\n[23:15:54] [INFO] testing connection to the target URL\ngot a 302 redirect to 'http://localhost/DVWA/login.php'. Do you want to follow? [Y/n] Y\nyou have not declared cookie(s), while server wants to set its own ('security=impossible;PHPSESSID=9bceec02a45...14b32c1f71'). Do you want to use those [Y/n] Y\n[23:15:54] [INFO] testing if the target URL content is stable\n[23:15:55] [WARNING] URI parameter '#1*' does not appear to be dynamic\n[23:15:55] [WARNING] heuristic (basic) test shows that URI parameter '#1*' might not be injectable\n[23:15:55] [INFO] testing for SQL injection on URI parameter '#1*'\n[23:15:55] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'\n[23:15:55] [INFO] testing 'Boolean-based blind - Parameter replace (original value)'\n[23:15:55] [INFO] testing 'MySQL >= 5.1 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (EXTRACTVALUE)'\n[23:15:55] [INFO] testing 'PostgreSQL AND error-based - WHERE or HAVING clause'\n[23:15:55] [INFO] testing 'Microsoft SQL Server/Sybase AND error-based - WHERE or HAVING clause (IN)'\n[23:15:55] [INFO] testing 'Oracle AND error-based - WHERE or HAVING clause (XMLType)'\n[23:15:55] [INFO] testing 'Generic inline queries'\n[23:15:55] [INFO] testing 'PostgreSQL > 8.1 stacked queries (comment)'\n[23:15:55] [INFO] testing 'Microsoft SQL Server/Sybase stacked queries (comment)'\n[23:15:55] [INFO] testing 'Oracle stacked queries (DBMS_PIPE.RECEIVE_MESSAGE - comment)'\n[23:15:55] [INFO] testing 'MySQL >= 5.0.12 AND time-based blind (query SLEEP)'\n[23:15:55] [INFO] testing 'PostgreSQL > 8.1 AND time-based blind'\n[23:15:55] [INFO] testing 'Microsoft SQL Server/Sybase time-based blind (IF)'\n[23:15:55] [INFO] testing 'Oracle AND time-based blind'\nit is recommended to perform only basic UNION tests if there is not at least one other (potential) technique found. Do you want to reduce the number of requests? [Y/n] Y\n[23:15:55] [INFO] testing 'Generic UNION query (NULL) - 1 to 10 columns'\n[23:15:55] [WARNING] URI parameter '#1*' does not seem to be injectable\n[23:15:55] [CRITICAL] all tested parameters do not appear to be injectable. Try to increase values for '--level'/'--risk' options if you wish to perform more tests. If you suspect that there is some kind of protection mechanism involved (e.g. WAF) maybe you could try to use option '--tamper' (e.g. '--tamper=space2comment') and/or switch '--random-agent'\n[23:15:55] [WARNING] HTTP error codes detected during run:\n404 (Not Found) - 72 times\n\n[*] ending @ 23:15:55 /2026-05-16/\n\n",
+        "vulnerabilities": [],
+        "injections": [],
+        "databases": [],
+        "tables": [],
+        "summary": {
+            "is_vulnerable": true,
+            "injection_points": 0,
+            "database_type": "",
+            "total_databases": 0,
+            "total_tables": 0
+        }
+    },
+    "nikto": {
+        "scan_type": "nikto_scan",
+        "target": "http://localhost/DVWA/vulnerabilities/xss_r/",
+        "timestamp": "2026-05-16 23:18:20",
+        "raw_output": "- Nikto v2.6.0\n---------------------------------------------------------------------------\n+ Target IP:          127.0.0.1\n+ Target Hostname:    localhost\n+ Target Port:        80\n+ Platform:           Linux/Unix\n+ Start Time:         2026-05-16 23:15:58 (GMT5.5)\n---------------------------------------------------------------------------\n+ Server: Apache/2.4.67 (Unix) PHP/8.5.6\n+ [999986] /DVWA/vulnerabilities/xss_r/: Retrieved x-powered-by header: PHP/8.5.6.\n+ No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.\n+ [999965] /index: Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. The following alternatives for 'index' were found: HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var. See: http://www.wisec.it/sectou.php?id=4698ebdc59d15,https://exchange.xforce.ibmcloud.com/vulnerabilities/8275\n+ [013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy\n+ [013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy\n+ [013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: x-content-type-options. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options\n+ [013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP\n+ [013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: strict-transport-security. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security\n+ [000434] /: HTTP TRACE method is active and replies which suggests the host is vulnerable to XST. See: https://owasp.org/www-community/attacks/Cross_Site_Tracing\n+ [750500] /DVWA/vulnerabilities/xss_r/help/: Directory indexing found.\n+ [000045] /DVWA/vulnerabilities/xss_r/help/: Help directory should not be accessible.\n+ [750500] /DVWA/vulnerabilities/xss_r/source/: Directory indexing found.\n+ Scan terminated: 7 errors and 11 items reported on the remote host\n+ End Time:           2026-05-16 23:18:20 (GMT5.5) (142 seconds)\n---------------------------------------------------------------------------\n+ 1 host(s) tested\n",
+        "findings": [
+            {
+                "description": "Target IP:          127.0.0.1",
+                "severity": "info"
+            },
+            {
+                "description": "Target Hostname:    localhost",
+                "severity": "info"
+            },
+            {
+                "description": "Target Port:        80",
+                "severity": "info"
+            },
+            {
+                "description": "Platform:           Linux/Unix",
+                "severity": "info"
+            },
+            {
+                "description": "Start Time:         2026-05-16 23:15:58 (GMT5.5)",
+                "severity": "info"
+            },
+            {
+                "description": "Server: Apache/2.4.67 (Unix) PHP/8.5.6",
+                "severity": "info"
+            },
+            {
+                "description": "[999986] /DVWA/vulnerabilities/xss_r/: Retrieved x-powered-by header: PHP/8.5.6.",
+                "severity": "low"
+            },
+            {
+                "description": "No CGI Directories found (use '-C all' to force check all possible dirs). CGI tests skipped.",
+                "severity": "info"
+            },
+            {
+                "description": "[999965] /index: Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. The following alternatives for 'index' were found: HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var. See: http://www.wisec.it/sectou.php?id=4698ebdc59d15,https://exchange.xforce.ibmcloud.com/vulnerabilities/8275",
+                "severity": "info"
+            },
+            {
+                "description": "[013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: permissions-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy",
+                "severity": "low"
+            },
+            {
+                "description": "[013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: referrer-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy",
+                "severity": "low"
+            },
+            {
+                "description": "[013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: x-content-type-options. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options",
+                "severity": "low"
+            },
+            {
+                "description": "[013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: content-security-policy. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP",
+                "severity": "low"
+            },
+            {
+                "description": "[013587] /DVWA/vulnerabilities/xss_r/: Suggested security header missing: strict-transport-security. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security",
+                "severity": "low"
+            },
+            {
+                "description": "[000434] /: HTTP TRACE method is active and replies which suggests the host is vulnerable to XST. See: https://owasp.org/www-community/attacks/Cross_Site_Tracing",
+                "severity": "high"
+            },
+            {
+                "description": "[750500] /DVWA/vulnerabilities/xss_r/help/: Directory indexing found.",
+                "severity": "info"
+            },
+            {
+                "description": "[000045] /DVWA/vulnerabilities/xss_r/help/: Help directory should not be accessible.",
+                "severity": "info"
+            },
+            {
+                "description": "[750500] /DVWA/vulnerabilities/xss_r/source/: Directory indexing found.",
+                "severity": "info"
+            },
+            {
+                "description": "Scan terminated: 7 errors and 11 items reported on the remote host",
+                "severity": "info"
+            },
+            {
+                "description": "End Time:           2026-05-16 23:18:20 (GMT5.5) (142 seconds)",
+                "severity": "info"
+            },
+            {
+                "description": "1 host(s) tested",
+                "severity": "info"
+            }
+        ],
+        "summary": {
+            "total_items_found": 21,
+            "server_info": "Apache/2.4.67 (Unix) PHP/8.5.6",
+            "target_ip": "127.0.0.1",
+            "target_port": "80",
+            "by_severity": {
+                "critical": 0,
+                "high": 1,
+                "medium": 0,
+                "low": 6,
+                "info": 14
+            },
+            "total_findings": 21
+        }
+    },
+    "vulnerabilities": [
+        {
+            "tool": "Nikto",
+            "severity": "high",
+            "description": "[000434] /: HTTP TRACE method is active and replies which suggests the host is vulnerable to XST. See: https://owasp.org/www-community/attacks/Cross_Site_Tracing"
+        }
+    ]
+}

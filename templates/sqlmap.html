@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}SQLMap Scanner - CyberAuditX{% endblock %}
+
+{% block content %}
+<h2>💉 SQLMap - SQL Injection Testing</h2>
+
+<div class="alert alert-error">
+    <strong>⚠️ Warning:</strong> SQLMap can be intrusive. Only test web applications you have explicit permission to test. Unauthorized testing is illegal.
+</div>
+
+<div class="scan-form">
+    <form id="sqlmapForm">
+        <div class="form-group">
+            <label for="target">Target URL *</label>
+            <input type="text" id="target" name="target" placeholder="e.g., http://example.com/page.php?id=1" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="scan_type">Scan Type *</label>
+            <select id="scan_type" name="scan_type" required onchange="toggleDepthField()">
+                <option value="basic">Basic Scan (Quick injection test)</option>
+                <option value="deep">Deep Scan (Extensive testing with level 3)</option>
+                <option value="dbs">Database Enumeration</option>
+                <option value="forms">Scan All Forms</option>
+                <option value="crawl">Crawl & Test</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="depthGroup" style="display: none;">
+            <label for="depth">Crawl Depth</label>
+            <input type="number" id="depth" name="depth" value="2" min="1" max="5">
+        </div>
+        
+        <button type="submit" class="btn" id="scanBtn">🚀 Start Scan</button>
+    </form>
+</div>
+
+<div id="loadingDiv" class="loading" style="display: none;">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; color: #e2e8f0; font-size: 18px;">Testing for SQL injection... This may take several minutes.</p>
+</div>
+
+<div id="errorDiv" style="display: none;"></div>
+
+<div id="resultsDiv" class="results-container" style="display: none;">
+    <h3 style="color: #e2e8f0; margin-bottom: 20px;">📊 Scan Results</h3>
+    <div id="resultsContent"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleDepthField() {
+    const scanType = document.getElementById('scan_type').value;
+    const depthGroup = document.getElementById('depthGroup');
+    depthGroup.style.display = scanType === 'crawl' ? 'block' : 'none';
+}
+
+document.getElementById('sqlmapForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const scanBtn = document.getElementById('scanBtn');
+    const loadingDiv = document.getElementById('loadingDiv');
+    const resultsDiv = document.getElementById('resultsDiv');
+    const errorDiv = document.getElementById('errorDiv');
+    
+    // Hide previous results
+    resultsDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    
+    // Show loading
+    loadingDiv.style.display = 'block';
+    scanBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/scan/sqlmap', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        loadingDiv.style.display = 'none';
+        scanBtn.disabled = false;
+        
+        if (data.error) {
+            errorDiv.innerHTML = `<div class="alert alert-error"><strong>Error:</strong> ${data.error}</div>`;
+            errorDiv.style.display = 'block';
+        } else {
+            displayResults(data.results, data.filepath);
+            resultsDiv.style.display = 'block';
+        }
+    } catch (error) {
+        loadingDiv.style.display = 'none';
+        scanBtn.disabled = false;
+        errorDiv.innerHTML = `<div class="alert alert-error"><strong>Error:</strong> ${error.message}</div>`;
+        errorDiv.style.display = 'block';
+    }
+});
+
+function displayResults(results, filepath) {
+    const container = document.getElementById('resultsContent');
+    const summary = results.summary || {};
+    
+    let html = `
+        <div style="background: rgba(255, 255, 255, 0.04); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.08);">
+            <p style="color: #e2e8f0;"><strong>Target:</strong> ${results.target}</p>
+            <p style="color: #e2e8f0;"><strong>Scan Type:</strong> ${results.scan_type}</p>
+            <p style="color: #e2e8f0;"><strong>Timestamp:</strong> ${results.timestamp}</p>
+            <p style="color: #e2e8f0;"><strong>Vulnerabilities Found:</strong> <span style="color: #ef5350; font-weight: 600;">${summary.total_vulnerabilities || 0}</span></p>
+            <p style="color: #e2e8f0;"><strong>Vulnerable Parameters:</strong> <span style="color: #ef5350; font-weight: 600;">${summary.vulnerable_parameters || 0}</span></p>
+        </div>
+    `;
+    
+    if (results.vulnerabilities && results.vulnerabilities.length > 0) {
+        html += `<div class="alert alert-error"><strong>⚠️ SQL Injection Vulnerabilities Detected!</strong></div>`;
+        html += `<h4 style="color: #e2e8f0; margin: 20px 0;">Vulnerabilities:</h4>`;
+        results.vulnerabilities.forEach(vuln => {
+            html += `
+                <div class="finding critical">
+                    <span class="severity-badge severity-critical">CRITICAL</span>
+                    <p style="margin: 10px 0;"><strong>Parameter:</strong> ${vuln.parameter}</p>
+                    <p><strong>Type:</strong> ${vuln.type}</p>
+                    <p><strong>Payload:</strong> <code>${vuln.payload || 'N/A'}</code></p>
+                    ${vuln.dbms ? `<p><strong>DBMS:</strong> ${vuln.dbms}</p>` : ''}
+                </div>
+            `;
+        });
+    } else {
+        html += `<div class="alert alert-success"><strong>✓ Good News!</strong> No SQL injection vulnerabilities detected.</div>`;
+    }
+    
+    if (results.databases && results.databases.length > 0) {
+        html += `<h4 style="color: #e2e8f0; margin: 20px 0;">Databases Found:</h4>`;
+        html += `<div class="results-box">`;
+        results.databases.forEach(db => {
+            html += `📁 ${db}<br>`;
+        });
+        html += `</div>`;
+    }
+    
+    html += `
+        <div style="margin-top: 20px; display: flex; gap: 15px;">
+            <a href="/download/${filepath.split('/').pop()}" class="btn">💾 Download Results</a>
+            <button onclick="getAIAnalysis()" class="btn" id="aiAnalyzeBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">🤖 AI Analysis</button>
+        </div>
+        
+        <div id="aiAnalysisSection" style="display: none; margin-top: 30px;">
+            <h3 style="color: #e2e8f0; margin-bottom: 20px;">🤖 AI-Powered Analysis</h3>
+            <div id="aiAnalysisContent"></div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    window.currentScanResults = results;
+}
+
+async function getAIAnalysis() {
+    const btn = document.getElementById('aiAnalyzeBtn');
+    const section = document.getElementById('aiAnalysisSection');
+    const content = document.getElementById('aiAnalysisContent');
+    
+    btn.disabled = true;
+    btn.textContent = '🔄 Analyzing...';
+    
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #94a3b8;">AI is analyzing your scan results...</p>
+        </div>
+    `;
+    section.style.display = 'block';
+    
+    try {
+        const response = await fetch('/api/analyze/sqlmap', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({results: window.currentScanResults})
+        });
+        
+        const analysis = await response.json();
+        
+        if (analysis.error) {
+            content.innerHTML = `
+                <div style="background: rgba(239, 83, 80, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef5350;">
+                    <p style="color: #ef5350; margin: 0;"><strong>❌ Error:</strong> ${sanitizeHTML(analysis.error)}</p>
+                </div>
+            `;
+        } else if (Object.keys(analysis).length === 0) {
+            content.innerHTML = `
+                <div style="background: rgba(255, 193, 7, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <p style="color: #ffc107; margin: 0;"><strong>⚠️ Warning:</strong> AI returned empty results. Please try again.</p>
+                </div>
+            `;
+        } else {
+            displayAIAnalysis(analysis);
+        }
+        
+        btn.textContent = '✅ Analysis Complete';
+    } catch (error) {
+        content.innerHTML = `
+            <div style="background: rgba(239, 83, 80, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef5350;">
+                <p style="color: #ef5350; margin: 0;"><strong>❌ Error:</strong> Failed to get AI analysis: ${sanitizeHTML(error.message)}</p>
+            </div>
+        `;
+        btn.textContent = '❌ Analysis Failed';
+        btn.disabled = false;
+    }
+}
+
+function sanitizeHTML(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function displayAIAnalysis(analysis) {
+    const content = document.getElementById('aiAnalysisContent');
+    
+    let html = `
+        <div style="background: rgba(239, 83, 80, 0.15); padding: 25px; border-radius: 12px; border: 1px solid rgba(239, 83, 80, 0.3); margin-bottom: 20px;">
+            <h4 style="color: #ef5350; margin-bottom: 15px; font-size: 16px; font-weight: 600;">🎯 Impact Assessment</h4>
+            <p style="color: #e2e8f0; line-height: 1.8; font-size: 14px; margin: 0;">${sanitizeHTML(analysis.impact_assessment || 'No assessment available')}</p>
+        </div>
+    `;
+    
+    if (analysis.exploitation_scenarios && analysis.exploitation_scenarios.length > 0) {
+        html += `
+            <div style="background: rgba(255, 152, 0, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 152, 0, 0.3); margin-bottom: 20px;">
+                <h4 style="color: #ff9800; margin-bottom: 15px; font-size: 16px; font-weight: 600;">💥 Exploitation Scenarios (${analysis.exploitation_scenarios.length})</h4>
+                <ul style="color: #e2e8f0; line-height: 2; margin: 0 0 0 25px; padding: 0; font-size: 14px;">
+                    ${analysis.exploitation_scenarios.map(s => `<li style="margin-bottom: 8px;">${sanitizeHTML(s)}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    if (analysis.immediate_fixes && analysis.immediate_fixes.length > 0) {
+        html += `
+            <div style="background: rgba(255, 193, 7, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 193, 7, 0.3); margin-bottom: 20px;">
+                <h4 style="color: #ffc107; margin-bottom: 15px; font-size: 16px; font-weight: 600;">🔧 Immediate Fixes - Priority (${analysis.immediate_fixes.length})</h4>
+                <ol style="color: #e2e8f0; line-height: 2; margin: 0 0 0 25px; padding: 0; font-size: 14px;">
+                    ${analysis.immediate_fixes.map(fix => `<li style="margin-bottom: 8px;"><strong>${sanitizeHTML(fix)}</strong></li>`).join('')}
+                </ol>
+            </div>
+        `;
+    }
+    
+    if (analysis.long_term_improvements && analysis.long_term_improvements.length > 0) {
+        html += `
+            <div style="background: rgba(56, 239, 125, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(56, 239, 125, 0.3);">
+                <h4 style="color: #38ef7d; margin-bottom: 15px; font-size: 16px; font-weight: 600;">💡 Long-term Improvements (${analysis.long_term_improvements.length})</h4>
+                <ul style="color: #e2e8f0; line-height: 2; margin: 0 0 0 25px; padding: 0; font-size: 14px;">
+                    ${analysis.long_term_improvements.map(imp => `<li style="margin-bottom: 8px;">${sanitizeHTML(imp)}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    content.innerHTML = html;
+}
+</script>
+{% endblock %}

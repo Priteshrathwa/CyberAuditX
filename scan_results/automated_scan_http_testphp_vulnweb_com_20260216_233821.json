@@ -1,0 +1,123 @@
+{
+    "scan_id": "scan_20260216233600",
+    "target": "http://testphp.vulnweb.com",
+    "timestamp": "2026-02-16 23:36:00",
+    "nmap": {
+        "scan_type": "service_version_scan",
+        "target": "testphp.vulnweb.com",
+        "timestamp": "2026-02-16 23:36:37",
+        "raw_output": "Starting Nmap 7.98 ( https://nmap.org ) at 2026-02-16 23:36 +0530\nNmap scan report for testphp.vulnweb.com (44.228.249.3)\nHost is up (0.28s latency).\nOther addresses for testphp.vulnweb.com (not scanned): 64:ff9b::2ce4:f903\nrDNS record for 44.228.249.3: ec2-44-228-249-3.us-west-2.compute.amazonaws.com\nNot shown: 999 filtered tcp ports (no-response)\nPORT   STATE SERVICE VERSION\n80/tcp open  http    nginx 1.19.0\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 36.96 seconds\n",
+        "ports": [
+            {
+                "port": "80/tcp",
+                "state": "open",
+                "service": "http",
+                "version": "nginx 1.19.0"
+            }
+        ],
+        "summary": {
+            "total_ports": 1,
+            "open_ports": 1
+        }
+    },
+    "sqlmap": {
+        "scan_type": "basic_scan",
+        "target": "http://testphp.vulnweb.com",
+        "timestamp": "2026-02-16 23:36:40",
+        "raw_output": "        ___\n       __H__\n ___ ___[(]_____ ___ ___  {1.10.2#stable}\n|_ -| . [.]     | .'| . |\n|___|_  [(]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\n[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program\n\n[*] starting @ 23:36:38 /2026-02-16/\n\n[23:36:38] [INFO] testing connection to the target URL\n[23:36:39] [INFO] testing if the target URL content is stable\n[23:36:39] [INFO] target URL content is stable\n[23:36:39] [CRITICAL] no parameter(s) found for testing in the provided data (e.g. GET parameter 'id' in 'www.site.com/index.php?id=1'). You are advised to rerun with '--forms --crawl=2'\n\n[*] ending @ 23:36:39 /2026-02-16/\n\n",
+        "vulnerabilities": [],
+        "injections": [],
+        "databases": [],
+        "tables": [],
+        "summary": {
+            "is_vulnerable": false,
+            "injection_points": 0,
+            "database_type": "",
+            "total_databases": 0,
+            "total_tables": 0
+        }
+    },
+    "nikto": {
+        "scan_type": "nikto_scan",
+        "target": "http://testphp.vulnweb.com",
+        "timestamp": "2026-02-16 23:38:21",
+        "raw_output": "- Nikto v2.5.0\n---------------------------------------------------------------------------\n+ Multiple IPs found: 44.228.249.3, 64:ff9b::2ce4:f903\n+ Target IP:          44.228.249.3\n+ Target Hostname:    testphp.vulnweb.com\n+ Target Port:        80\n+ Start Time:         2026-02-16 23:36:41 (GMT5.5)\n---------------------------------------------------------------------------\n+ Server: nginx/1.19.0\n+ /: Retrieved x-powered-by header: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1.\n+ /: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options\n+ /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/\n+ /clientaccesspolicy.xml contains a full wildcard entry. See: https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/cc197955(v=vs.95)?redirectedfrom=MSDN\n+ /clientaccesspolicy.xml contains 12 lines which should be manually viewed for improper domains or wildcards. See: https://www.acunetix.com/vulnerabilities/web/insecure-clientaccesspolicy-xml-file/\n+ /crossdomain.xml contains a full wildcard entry. See: http://jeremiahgrossman.blogspot.com/2008/05/crossdomainxml-invites-cross-site.html\n+ Scan terminated: 20 error(s) and 6 item(s) reported on remote host\n+ End Time:           2026-02-16 23:38:21 (GMT5.5) (100 seconds)\n---------------------------------------------------------------------------\n+ 1 host(s) tested\n",
+        "findings": [
+            {
+                "description": "Multiple IPs found: 44.228.249.3, 64:ff9b::2ce4:f903",
+                "severity": "info"
+            },
+            {
+                "description": "Target IP:          44.228.249.3",
+                "severity": "info"
+            },
+            {
+                "description": "Target Hostname:    testphp.vulnweb.com",
+                "severity": "info"
+            },
+            {
+                "description": "Target Port:        80",
+                "severity": "info"
+            },
+            {
+                "description": "Start Time:         2026-02-16 23:36:41 (GMT5.5)",
+                "severity": "info"
+            },
+            {
+                "description": "Server: nginx/1.19.0",
+                "severity": "info"
+            },
+            {
+                "description": "/: Retrieved x-powered-by header: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1.",
+                "severity": "low"
+            },
+            {
+                "description": "/: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options",
+                "severity": "low"
+            },
+            {
+                "description": "/: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/",
+                "severity": "low"
+            },
+            {
+                "description": "/clientaccesspolicy.xml contains a full wildcard entry. See: https://docs.microsoft.com/en-us/previous-versions/windows/silverlight/dotnet-windows-silverlight/cc197955(v=vs.95)?redirectedfrom=MSDN",
+                "severity": "info"
+            },
+            {
+                "description": "/clientaccesspolicy.xml contains 12 lines which should be manually viewed for improper domains or wildcards. See: https://www.acunetix.com/vulnerabilities/web/insecure-clientaccesspolicy-xml-file/",
+                "severity": "info"
+            },
+            {
+                "description": "/crossdomain.xml contains a full wildcard entry. See: http://jeremiahgrossman.blogspot.com/2008/05/crossdomainxml-invites-cross-site.html",
+                "severity": "info"
+            },
+            {
+                "description": "Scan terminated: 20 error(s) and 6 item(s) reported on remote host",
+                "severity": "info"
+            },
+            {
+                "description": "End Time:           2026-02-16 23:38:21 (GMT5.5) (100 seconds)",
+                "severity": "info"
+            },
+            {
+                "description": "1 host(s) tested",
+                "severity": "info"
+            }
+        ],
+        "summary": {
+            "total_items_found": 15,
+            "server_info": "nginx/1.19.0",
+            "target_ip": "44.228.249.3",
+            "target_port": "80",
+            "by_severity": {
+                "critical": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 3,
+                "info": 12
+            },
+            "total_findings": 15
+        }
+    },
+    "vulnerabilities": []
+}

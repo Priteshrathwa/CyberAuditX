@@ -1,0 +1,157 @@
+{
+    "scan_id": "scan_20260403200328",
+    "target": "http://localhost/DVWA/vulnerabilities/sqli/",
+    "timestamp": "2026-04-03 20:03:28",
+    "nmap": {
+        "scan_type": "service_version_scan",
+        "target": "localhost",
+        "timestamp": "2026-04-03 20:03:35",
+        "raw_output": "Starting Nmap 7.98 ( https://nmap.org ) at 2026-04-03 20:03 +0530\nNmap scan report for localhost (127.0.0.1)\nHost is up (0.000029s latency).\nOther addresses for localhost (not scanned): ::1\nNot shown: 997 closed tcp ports (conn-refused)\nPORT     STATE SERVICE VERSION\n80/tcp   open  http    Apache httpd 2.4.66 ((Unix) PHP/8.5.2)\n3306/tcp open  mysql   MariaDB 12.1.2\n5000/tcp open  http    Werkzeug httpd 3.1.5 (Python 3.14.2)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 6.20 seconds\n",
+        "ports": [
+            {
+                "port": "80/tcp",
+                "state": "open",
+                "service": "http",
+                "version": "Apache httpd 2.4.66 ((Unix) PHP/8.5.2)"
+            },
+            {
+                "port": "3306/tcp",
+                "state": "open",
+                "service": "mysql",
+                "version": "MariaDB 12.1.2"
+            },
+            {
+                "port": "5000/tcp",
+                "state": "open",
+                "service": "http",
+                "version": "Werkzeug httpd 3.1.5 (Python 3.14.2)"
+            }
+        ],
+        "summary": {
+            "total_ports": 3,
+            "open_ports": 3
+        }
+    },
+    "sqlmap": {
+        "scan_type": "basic_scan",
+        "target": "http://localhost/DVWA/vulnerabilities/sqli/",
+        "timestamp": "2026-04-03 20:03:36",
+        "raw_output": "        ___\n       __H__\n ___ ___[,]_____ ___ ___  {1.10.2#stable}\n|_ -| . [']     | .'| . |\n|___|_  [.]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\n[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program\n\n[*] starting @ 20:03:36 /2026-04-03/\n\n[20:03:36] [WARNING] you've provided target URL without any GET parameters (e.g. 'http://www.site.com/article.php?id=1') and without providing any POST parameters through option '--data'\ndo you want to try URI injections in the target URL itself? [Y/n/q] Y\n[20:03:36] [INFO] testing connection to the target URL\ngot a 302 redirect to 'http://localhost/DVWA/login.php'. Do you want to follow? [Y/n] Y\nyou have not declared cookie(s), while server wants to set its own ('security=impossible;PHPSESSID=0abcc6cae36...4c7e694fbf'). Do you want to use those [Y/n] Y\n[20:03:36] [INFO] testing if the target URL content is stable\n[20:03:36] [WARNING] URI parameter '#1*' does not appear to be dynamic\n[20:03:36] [WARNING] heuristic (basic) test shows that URI parameter '#1*' might not be injectable\n[20:03:36] [INFO] testing for SQL injection on URI parameter '#1*'\n[20:03:36] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'\n[20:03:36] [INFO] testing 'Boolean-based blind - Parameter replace (original value)'\n[20:03:36] [INFO] testing 'MySQL >= 5.1 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (EXTRACTVALUE)'\n[20:03:36] [INFO] testing 'PostgreSQL AND error-based - WHERE or HAVING clause'\n[20:03:36] [INFO] testing 'Microsoft SQL Server/Sybase AND error-based - WHERE or HAVING clause (IN)'\n[20:03:36] [INFO] testing 'Oracle AND error-based - WHERE or HAVING clause (XMLType)'\n[20:03:36] [INFO] testing 'Generic inline queries'\n[20:03:36] [INFO] testing 'PostgreSQL > 8.1 stacked queries (comment)'\n[20:03:36] [INFO] testing 'Microsoft SQL Server/Sybase stacked queries (comment)'\n[20:03:36] [INFO] testing 'Oracle stacked queries (DBMS_PIPE.RECEIVE_MESSAGE - comment)'\n[20:03:36] [INFO] testing 'MySQL >= 5.0.12 AND time-based blind (query SLEEP)'\n[20:03:36] [INFO] testing 'PostgreSQL > 8.1 AND time-based blind'\n[20:03:36] [INFO] testing 'Microsoft SQL Server/Sybase time-based blind (IF)'\n[20:03:36] [INFO] testing 'Oracle AND time-based blind'\nit is recommended to perform only basic UNION tests if there is not at least one other (potential) technique found. Do you want to reduce the number of requests? [Y/n] Y\n[20:03:36] [INFO] testing 'Generic UNION query (NULL) - 1 to 10 columns'\n[20:03:36] [WARNING] URI parameter '#1*' does not seem to be injectable\n[20:03:36] [CRITICAL] all tested parameters do not appear to be injectable. Try to increase values for '--level'/'--risk' options if you wish to perform more tests. If you suspect that there is some kind of protection mechanism involved (e.g. WAF) maybe you could try to use option '--tamper' (e.g. '--tamper=space2comment') and/or switch '--random-agent'\n[20:03:36] [WARNING] HTTP error codes detected during run:\n404 (Not Found) - 72 times\n\n[*] ending @ 20:03:36 /2026-04-03/\n\n",
+        "vulnerabilities": [],
+        "injections": [],
+        "databases": [],
+        "tables": [],
+        "summary": {
+            "is_vulnerable": true,
+            "injection_points": 0,
+            "database_type": "",
+            "total_databases": 0,
+            "total_tables": 0
+        }
+    },
+    "nikto": {
+        "scan_type": "nikto_scan",
+        "target": "http://localhost/DVWA/vulnerabilities/sqli/",
+        "timestamp": "2026-04-03 20:03:41",
+        "raw_output": "- Nikto v2.5.0\n---------------------------------------------------------------------------\n+ Target IP:          127.0.0.1\n+ Target Hostname:    localhost\n+ Target Port:        80\n+ Start Time:         2026-04-03 20:03:38 (GMT5.5)\n---------------------------------------------------------------------------\n+ Server: Apache/2.4.66 (Unix) PHP/8.5.2\n+ /DVWA/vulnerabilities/sqli/: Retrieved x-powered-by header: PHP/8.5.2.\n+ /DVWA/vulnerabilities/sqli/: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options\n+ /DVWA/vulnerabilities/sqli/: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/\n+ Root page /DVWA/vulnerabilities/sqli redirects to: ../../login.php\n+ No CGI Directories found (use '-C all' to force check all possible dirs)\n+ /index: Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. The following alternatives for 'index' were found: HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var. See: http://www.wisec.it/sectou.php?id=4698ebdc59d15,https://exchange.xforce.ibmcloud.com/vulnerabilities/8275\n+ OPTIONS: Allowed HTTP Methods: OPTIONS, HEAD, GET, POST, TRACE .\n+ /: HTTP TRACE method is active which suggests the host is vulnerable to XST. See: https://owasp.org/www-community/attacks/Cross_Site_Tracing\n+ /DVWA/vulnerabilities/sqli/help/: Directory indexing found.\n+ /DVWA/vulnerabilities/sqli/help/: Help directory should not be accessible.\n+ /DVWA/vulnerabilities/sqli/source/: Directory indexing found.\n+ 4073 requests: 0 error(s) and 9 item(s) reported on remote host\n+ End Time:           2026-04-03 20:03:41 (GMT5.5) (3 seconds)\n---------------------------------------------------------------------------\n+ 1 host(s) tested\n",
+        "findings": [
+            {
+                "description": "Target IP:          127.0.0.1",
+                "severity": "info"
+            },
+            {
+                "description": "Target Hostname:    localhost",
+                "severity": "info"
+            },
+            {
+                "description": "Target Port:        80",
+                "severity": "info"
+            },
+            {
+                "description": "Start Time:         2026-04-03 20:03:38 (GMT5.5)",
+                "severity": "info"
+            },
+            {
+                "description": "Server: Apache/2.4.66 (Unix) PHP/8.5.2",
+                "severity": "info"
+            },
+            {
+                "description": "/DVWA/vulnerabilities/sqli/: Retrieved x-powered-by header: PHP/8.5.2.",
+                "severity": "low"
+            },
+            {
+                "description": "/DVWA/vulnerabilities/sqli/: The anti-clickjacking X-Frame-Options header is not present. See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options",
+                "severity": "low"
+            },
+            {
+                "description": "/DVWA/vulnerabilities/sqli/: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/",
+                "severity": "low"
+            },
+            {
+                "description": "Root page /DVWA/vulnerabilities/sqli redirects to: ../../login.php",
+                "severity": "info"
+            },
+            {
+                "description": "No CGI Directories found (use '-C all' to force check all possible dirs)",
+                "severity": "info"
+            },
+            {
+                "description": "/index: Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. The following alternatives for 'index' were found: HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var, HTTP_NOT_FOUND.html.var. See: http://www.wisec.it/sectou.php?id=4698ebdc59d15,https://exchange.xforce.ibmcloud.com/vulnerabilities/8275",
+                "severity": "info"
+            },
+            {
+                "description": "OPTIONS: Allowed HTTP Methods: OPTIONS, HEAD, GET, POST, TRACE .",
+                "severity": "low"
+            },
+            {
+                "description": "/: HTTP TRACE method is active which suggests the host is vulnerable to XST. See: https://owasp.org/www-community/attacks/Cross_Site_Tracing",
+                "severity": "high"
+            },
+            {
+                "description": "/DVWA/vulnerabilities/sqli/help/: Directory indexing found.",
+                "severity": "info"
+            },
+            {
+                "description": "/DVWA/vulnerabilities/sqli/help/: Help directory should not be accessible.",
+                "severity": "info"
+            },
+            {
+                "description": "/DVWA/vulnerabilities/sqli/source/: Directory indexing found.",
+                "severity": "info"
+            },
+            {
+                "description": "4073 requests: 0 error(s) and 9 item(s) reported on remote host",
+                "severity": "info"
+            },
+            {
+                "description": "End Time:           2026-04-03 20:03:41 (GMT5.5) (3 seconds)",
+                "severity": "info"
+            },
+            {
+                "description": "1 host(s) tested",
+                "severity": "info"
+            }
+        ],
+        "summary": {
+            "total_items_found": 19,
+            "server_info": "Apache/2.4.66 (Unix) PHP/8.5.2",
+            "target_ip": "127.0.0.1",
+            "target_port": "80",
+            "by_severity": {
+                "critical": 0,
+                "high": 1,
+                "medium": 0,
+                "low": 4,
+                "info": 14
+            },
+            "total_findings": 19
+        }
+    },
+    "vulnerabilities": [
+        {
+            "tool": "Nikto",
+            "severity": "high",
+            "description": "/: HTTP TRACE method is active which suggests the host is vulnerable to XST. See: https://owasp.org/www-community/attacks/Cross_Site_Tracing"
+        }
+    ]
+}

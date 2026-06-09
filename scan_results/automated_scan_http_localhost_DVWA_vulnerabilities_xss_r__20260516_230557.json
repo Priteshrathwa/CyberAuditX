@@ -1,0 +1,57 @@
+{
+    "scan_id": "scan_20260516230547",
+    "target": "http://localhost/DVWA/vulnerabilities/xss_r/",
+    "timestamp": "2026-05-16 23:05:47",
+    "nmap": {
+        "scan_type": "service_version_scan",
+        "target": "localhost",
+        "timestamp": "2026-05-16 23:05:54",
+        "raw_output": "Starting Nmap 7.99 ( https://nmap.org ) at 2026-05-16 23:05 +0530\nNmap scan report for localhost (127.0.0.1)\nHost is up (0.000029s latency).\nOther addresses for localhost (not scanned): ::1\nNot shown: 997 closed tcp ports (conn-refused)\nPORT     STATE SERVICE VERSION\n80/tcp   open  http    Apache httpd 2.4.67 ((Unix) PHP/8.5.6)\n3306/tcp open  mysql   MariaDB 12.2.2\n5000/tcp open  http    Werkzeug httpd 3.1.5 (Python 3.14.4)\n\nService detection performed. Please report any incorrect results at https://nmap.org/submit/ .\nNmap done: 1 IP address (1 host up) scanned in 6.18 seconds\n",
+        "ports": [
+            {
+                "port": "80/tcp",
+                "state": "open",
+                "service": "http",
+                "version": "Apache httpd 2.4.67 ((Unix) PHP/8.5.6)"
+            },
+            {
+                "port": "3306/tcp",
+                "state": "open",
+                "service": "mysql",
+                "version": "MariaDB 12.2.2"
+            },
+            {
+                "port": "5000/tcp",
+                "state": "open",
+                "service": "http",
+                "version": "Werkzeug httpd 3.1.5 (Python 3.14.4)"
+            }
+        ],
+        "summary": {
+            "total_ports": 3,
+            "open_ports": 3
+        }
+    },
+    "sqlmap": {
+        "scan_type": "basic_scan",
+        "target": "http://localhost/DVWA/vulnerabilities/xss_r/",
+        "timestamp": "2026-05-16 23:05:55",
+        "raw_output": "        ___\n       __H__\n ___ ___[\"]_____ ___ ___  {1.10.4#stable}\n|_ -| . [,]     | .'| . |\n|___|_  [.]_|_|_|__,|  _|\n      |_|V...       |_|   https://sqlmap.org\n\n[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program\n\n[*] starting @ 23:05:55 /2026-05-16/\n\n[23:05:55] [WARNING] you've provided target URL without any GET parameters (e.g. 'http://www.site.com/article.php?id=1') and without providing any POST parameters through option '--data'\ndo you want to try URI injections in the target URL itself? [Y/n/q] Y\n[23:05:55] [INFO] testing connection to the target URL\ngot a 302 redirect to 'http://localhost/DVWA/login.php'. Do you want to follow? [Y/n] Y\nyou have not declared cookie(s), while server wants to set its own ('security=impossible;PHPSESSID=094b3985a8d...9892632c3d'). Do you want to use those [Y/n] Y\n[23:05:55] [INFO] checking if the target is protected by some kind of WAF/IPS\n[23:05:55] [INFO] testing if the target URL content is stable\n[23:05:55] [WARNING] URI parameter '#1*' does not appear to be dynamic\n[23:05:55] [WARNING] heuristic (basic) test shows that URI parameter '#1*' might not be injectable\n[23:05:55] [INFO] testing for SQL injection on URI parameter '#1*'\n[23:05:55] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'\n[23:05:55] [INFO] testing 'Boolean-based blind - Parameter replace (original value)'\n[23:05:55] [INFO] testing 'MySQL >= 5.1 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (EXTRACTVALUE)'\n[23:05:55] [INFO] testing 'PostgreSQL AND error-based - WHERE or HAVING clause'\n[23:05:55] [INFO] testing 'Microsoft SQL Server/Sybase AND error-based - WHERE or HAVING clause (IN)'\n[23:05:55] [INFO] testing 'Oracle AND error-based - WHERE or HAVING clause (XMLType)'\n[23:05:55] [INFO] testing 'Generic inline queries'\n[23:05:55] [INFO] testing 'PostgreSQL > 8.1 stacked queries (comment)'\n[23:05:55] [INFO] testing 'Microsoft SQL Server/Sybase stacked queries (comment)'\n[23:05:55] [INFO] testing 'Oracle stacked queries (DBMS_PIPE.RECEIVE_MESSAGE - comment)'\n[23:05:55] [INFO] testing 'MySQL >= 5.0.12 AND time-based blind (query SLEEP)'\n[23:05:55] [INFO] testing 'PostgreSQL > 8.1 AND time-based blind'\n[23:05:55] [INFO] testing 'Microsoft SQL Server/Sybase time-based blind (IF)'\n[23:05:55] [INFO] testing 'Oracle AND time-based blind'\nit is recommended to perform only basic UNION tests if there is not at least one other (potential) technique found. Do you want to reduce the number of requests? [Y/n] Y\n[23:05:55] [INFO] testing 'Generic UNION query (NULL) - 1 to 10 columns'\n[23:05:55] [WARNING] URI parameter '#1*' does not seem to be injectable\n[23:05:55] [CRITICAL] all tested parameters do not appear to be injectable. Try to increase values for '--level'/'--risk' options if you wish to perform more tests. If you suspect that there is some kind of protection mechanism involved (e.g. WAF) maybe you could try to use option '--tamper' (e.g. '--tamper=space2comment') and/or switch '--random-agent'\n[23:05:55] [WARNING] HTTP error codes detected during run:\n404 (Not Found) - 72 times\n\n[*] ending @ 23:05:55 /2026-05-16/\n\n",
+        "vulnerabilities": [],
+        "injections": [],
+        "databases": [],
+        "tables": [],
+        "summary": {
+            "is_vulnerable": true,
+            "injection_points": 0,
+            "database_type": "",
+            "total_databases": 0,
+            "total_tables": 0
+        }
+    },
+    "nikto": {
+        "error": "ERROR: Required module not found: XML::Writer\n",
+        "raw_output": ""
+    },
+    "vulnerabilities": []
+}

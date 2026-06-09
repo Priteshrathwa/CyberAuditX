@@ -1,0 +1,72 @@
+================================================================================
+   CyberAuditX - Horizontal Flowchart (Fits Half A4 Landscape Page)
+================================================================================
+
+START --> Select --> Input --> Validate --> Execute --> Parse --> Categ --> 
+  |
+  +-> Error (No)
+      |
+      +-> Input (Loop)
+
+Execute branches:
+  ├-> Nmap: nmap -sV
+  ├-> Nikto: nikto -h
+  └-> SQLMap: sqlmap --batch
+  
+      (All converge to Parse)
+
+Parse --> Categ --> Save --> Display --> Review --> AI Decision --> Export
+
+AI Decision (Yes branch):
+  ├-> Build Prompt
+  ├-> Call Gemini API
+  ├-> Parse JSON
+  ├-> Show Analysis
+  └-> Export
+
+Export --> Another Scan? --> 
+  ├-> Yes: Loop back to Select
+  └-> No: END
+
+================================================================================
+COMPACT FLOW
+================================================================================
+
+Start --> SelectScanner --> EnterTarget --> ValidateInput --> ExecuteScanner
+   |                                              |
+   +---- Input Validation ----+                   |
+                              v                   |
+                    Nmap/Nikto/SQLMap             |
+                              |                   |
+                              +---<Scanner Exec>--+
+                                      |
+                                      v
+                        Parse --> Categorize --> Save --> Display --> Review
+                                                                          |
+                            AI Analysis (Optional)                        |
+                            |                                             |
+                            +-> Build Prompt -> Call Gemini API          |
+                            +-> Parse JSON -> Display Analysis           |
+                                      |                                   |
+                                      +---- Converge ----+                |
+                                                         v
+                                                    Export Report
+                                                         |
+                                                         v
+                                                   Another Scan?
+                                                    /         \
+                                                 YES          NO
+                                                  |            |
+                                            Loop Back      Exit
+
+================================================================================
+LEGEND
+================================================================================
+
+Rectangle [ ]  = Process/Action
+Diamond   { }  = Decision Point
+Oval      ( )  = Start/End
+Arrow     -->  = Flow Direction
+Pipe      |    = Connection
+
+================================================================================

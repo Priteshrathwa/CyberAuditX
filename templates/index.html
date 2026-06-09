@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Home - CyberAuditX{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: stretch; }
+.hero-copy h2 { font-size: 30px; letter-spacing: -0.8px; margin: 10px 0 12px 0; }
+.hero-copy p { color: var(--muted); line-height: 1.7; margin-bottom: 18px; }
+.hero-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 14px; }
+.metric { padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); }
+.metric strong { display: block; font-size: 22px; margin-bottom: 4px; color: white; }
+.metric span { color: var(--muted); font-weight: 600; font-size: 13px; }
+.timeline { display: grid; gap: 10px; margin-top: 14px; }
+.timeline-item { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-2)); box-shadow: 0 0 0 6px rgba(124, 107, 255, 0.15); }
+.table-actions a { color: #a5b4fc; font-weight: 700; margin-right: 12px; text-decoration: none; }
+.table-actions a:last-child { margin-right: 0; }
+.table-actions a:hover { color: #38ef7d; }
+.badge-soft { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); font-weight: 700; font-size: 12px; letter-spacing: 0.3px; }
+.legal-card { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-left: 4px solid #f59e0b; color: #ffedd5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-grid">
+    <div class="card hero-copy">
+        <div class="pill">✨ New — Live vulnerability feed</div>
+        <h2>Secure every target with one launch</h2>
+        <p>Automated Nmap → SQLMap → Nikto with real-time visibility, tuned for fast results and crisp reporting.</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
+            <a href="{{ url_for('automated_page') }}" class="btn">🚀 Start Automated Scan</a>
+            <a href="{{ url_for('nmap_page') }}" class="btn btn-secondary">🔎 Quick Nmap</a>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <span class="chip">⚡ Optimized timeouts</span>
+            <span class="chip">📡 Live SSE stream</span>
+            <span class="chip">🧠 Curated summaries</span>
+        </div>
+    </div>
+
+    <div class="card" style="display: grid; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="badge-soft">🛠️ Tool Health</div>
+            <div class="badge-soft">📅 {{ recent_scans|length }} recent runs</div>
+        </div>
+        <div class="hero-metrics">
+            <div class="metric">
+                <strong>{{ recent_scans|length }}</strong>
+                <span>Scans logged</span>
+            </div>
+            <div class="metric">
+                <strong>{{ tools|length }}</strong>
+                <span>Tools detected</span>
+            </div>
+            <div class="metric">
+                <strong>~3-8 min</strong>
+                <span>Nikto max window</span>
+            </div>
+        </div>
+        <div class="tool-status" style="margin: 0; background: rgba(255,255,255,0.02);">
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for tool, available in tools.items() %}
+                <span class="tool-item {% if available %}tool-available{% else %}tool-unavailable{% endif %}">
+                    {{ tool.upper() }} — {% if available %}Ready{% else %}Missing{% endif %}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item"><div class="dot"></div><div><strong>Nmap discovery</strong><div class="badge-soft" style="margin-top: 6px;">Ports & service map</div></div></div>
+            <div class="timeline-item"><div class="dot"></div><div><strong>SQLMap probing</strong><div class="badge-soft" style="margin-top: 6px;">Injection checks</div></div></div>
+            <div class="timeline-item"><div class="dot"></div><div><strong>Nikto sweep</strong><div class="badge-soft" style="margin-top: 6px;">Web vuln pass</div></div></div>
+        </div>
+    </div>
+</div>
+
+{% if not tools.nmap and not tools.nikto and not tools.sqlmap %}
+<div class="alert alert-error"><strong>⚠️ Warning:</strong>No security tools detected. Install nmap, nikto, and sqlmap to run scans.</div>
+{% endif %}
+
+<div class="alert alert-info"><strong>ℹ️ Tip:</strong>Use Automated Scan for full coverage; jump to individual tools for focused checks.</div>
+
+<div class="grid-3" style="margin-top: 18px;">
+    <div class="card">
+        <div class="pill" style="margin-bottom: 12px;">🤖 Automated</div>
+        <h3 style="margin-bottom: 8px;">End-to-end run</h3>
+        <p style="color: var(--muted); line-height: 1.6;">Sequenced Nmap → SQLMap → Nikto with live SSE feed and saved artifacts.</p>
+        <a class="btn" href="{{ url_for('automated_page') }}" style="margin-top: 12px; width: 100%; justify-content: center;">Launch automated</a>
+    </div>
+    <div class="card">
+        <div class="pill" style="margin-bottom: 12px;">🌐 Nmap</div>
+        <h3 style="margin-bottom: 8px;">Port intelligence</h3>
+        <p style="color: var(--muted); line-height: 1.6;">Discover open ports, fingerprints, and service banners to map exposure quickly.</p>
+        <a class="btn btn-secondary" href="{{ url_for('nmap_page') }}" style="margin-top: 12px; width: 100%; justify-content: center;">Run Nmap</a>
+    </div>
+    <div class="card">
+        <div class="pill" style="margin-bottom: 12px;">🔍 Nikto</div>
+        <h3 style="margin-bottom: 8px;">Web vulns fast</h3>
+        <p style="color: var(--muted); line-height: 1.6;">Optimized Nikto with capped runtime, smart timeouts, and concise summaries.</p>
+        <a class="btn btn-secondary" href="{{ url_for('nikto_page') }}" style="margin-top: 12px; width: 100%; justify-content: center;">Run Nikto</a>
+    </div>
+</div>
+
+<div class="grid-2" style="margin-top: 18px;">
+    <div class="card">
+        <div class="pill" style="margin-bottom: 12px;">💉 SQLMap</div>
+        <h3 style="margin-bottom: 8px;">Injection coverage</h3>
+        <p style="color: var(--muted); line-height: 1.6;">Probe parameters, cookies, and forms for SQL injection with tuned verbosity.</p>
+        <a class="btn btn-secondary" href="{{ url_for('sqlmap_page') }}" style="margin-top: 12px; width: 100%; justify-content: center;">Run SQLMap</a>
+    </div>
+    <div class="card">
+        <div class="pill" style="margin-bottom: 12px;">⚡ Fast defaults</div>
+        <h3 style="margin-bottom: 8px;">Speed-first profiles</h3>
+        <p style="color: var(--muted); line-height: 1.6;">Nmap quick scans, SQLMap smart retries, Nikto capped at ~8 minutes with no DNS lookups.</p>
+    </div>
+</div>
+
+{% if recent_scans %}
+<div class="card" style="margin-top: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">📊 Recent Scans</h3>
+        <div class="badge-soft">Latest {{ recent_scans|length }} entries</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tool</th>
+                <th>Target</th>
+                <th>Type</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for scan in recent_scans|reverse %}
+            <tr>
+                <td style="font-weight: 700; color: #c7d2fe;">{{ scan.tool }}</td>
+                <td style="color: var(--muted);">{{ scan.target }}</td>
+                <td style="color: var(--muted);">{{ scan.scan_type }}</td>
+                <td style="color: var(--muted); font-size: 13px;">{{ scan.timestamp }}</td>
+                <td class="table-actions">
+                    <a href="{{ url_for('view_results', filename=scan.filepath.split('/')[-1]) }}">👁️ View</a>
+                    <a href="{{ url_for('download_results', filename=scan.filepath.split('/')[-1]) }}">💾 Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="card legal-card" style="margin-top: 24px;">
+    <h3 style="margin-bottom: 10px;">⚠️ Legal Disclaimer</h3>
+    <p style="line-height: 1.7; color: #fde68a;">This platform is for authorized security testing only. Obtain explicit permission before scanning any system. Unauthorized access is illegal and prosecutable.</p>
+</div>
+{% endblock %}

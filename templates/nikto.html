@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Nikto Scanner - CyberAuditX{% endblock %}
+
+{% block content %}
+<h2>🔍 Nikto Web Vulnerability Scanner</h2>
+
+<div class="scan-form">
+    <form id="niktoForm">
+        <div class="form-group">
+            <label for="target">Target URL *</label>
+            <input type="text" id="target" name="target" placeholder="e.g., http://example.com or https://example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="scan_type">Scan Type *</label>
+            <select id="scan_type" name="scan_type" required onchange="togglePortsField()">
+                <option value="basic">Basic Scan (Fast - 3 minutes max)</option>
+                <option value="full">Full Scan (Comprehensive - 8 minutes max)</option>
+                <option value="ssl">SSL/TLS Scan</option>
+                <option value="ports">Specific Ports Scan</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="portsGroup" style="display: none;">
+            <label for="ports">Ports (comma-separated)</label>
+            <input type="text" id="ports" name="ports" placeholder="e.g., 80,443,8080">
+        </div>
+        
+        <button type="submit" class="btn" id="scanBtn">🚀 Start Scan</button>
+    </form>
+</div>
+
+<div id="loadingDiv" class="loading" style="display: none;">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; color: #e2e8f0; font-size: 18px;">Scanning in progress... Please wait.</p>
+</div>
+
+<div id="errorDiv" style="display: none;"></div>
+
+<div id="resultsDiv" class="results-container" style="display: none;">
+    <h3 style="color: #e2e8f0; margin-bottom: 20px;">📊 Scan Results</h3>
+    <div id="resultsContent"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePortsField() {
+    const scanType = document.getElementById('scan_type').value;
+    const portsGroup = document.getElementById('portsGroup');
+    portsGroup.style.display = scanType === 'ports' ? 'block' : 'none';
+}
+
+document.getElementById('niktoForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const scanBtn = document.getElementById('scanBtn');
+    const loadingDiv = document.getElementById('loadingDiv');
+    const resultsDiv = document.getElementById('resultsDiv');
+    const errorDiv = document.getElementById('errorDiv');
+    
+    // Hide previous results
+    resultsDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    
+    // Show loading
+    loadingDiv.style.display = 'block';
+    scanBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/scan/nikto', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        loadingDiv.style.display = 'none';
+        scanBtn.disabled = false;
+        
+        if (data.error) {
+            errorDiv.innerHTML = `<div class="alert alert-error"><strong>Error:</strong> ${data.error}</div>`;
+            errorDiv.style.display = 'block';
+        } else {
+            displayResults(data.results, data.filepath);
+            resultsDiv.style.display = 'block';
+        }
+    } catch (error) {
+        loadingDiv.style.display = 'none';
+        scanBtn.disabled = false;
+        errorDiv.innerHTML = `<div class="alert alert-error"><strong>Error:</strong> ${error.message}</div>`;
+        errorDiv.style.display = 'block';
+    }
+});
+
+function displayResults(results, filepath) {
+    const container = document.getElementById('resultsContent');
+    const bySeverity = results.summary.by_severity || {critical: 0, high: 0, medium: 0, low: 0, info: 0};
+    const totalFindings = results.summary.total_findings || results.summary.total_items_found || 0;
+    
+    let html = `
+        <div style="background: rgba(255, 255, 255, 0.04); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.08);">
+            <p style="color: #e2e8f0;"><strong>Target:</strong> ${results.target}</p>
+            <p style="color: #e2e8f0;"><strong>Scan Type:</strong> ${results.scan_type}</p>
+            <p style="color: #e2e8f0;"><strong>Timestamp:</strong> ${results.timestamp}</p>
+            <p style="color: #e2e8f0;"><strong>Total Findings:</strong> ${totalFindings}</p>
+            <p style="color: #e2e8f0;"><strong>Critical:</strong> <span class="severity-badge severity-critical">${bySeverity.critical || 0}</span></p>
+            <p style="color: #e2e8f0;"><strong>High:</strong> <span class="severity-badge severity-high">${bySeverity.high || 0}</span></p>
+            <p style="color: #e2e8f0;"><strong>Medium:</strong> <span class="severity-badge severity-medium">${bySeverity.medium || 0}</span></p>
+            <p style="color: #e2e8f0;"><strong>Low:</strong> <span class="severity-badge severity-low">${bySeverity.low || 0}</span></p>
+        </div>
+    `;
+    
+    if (results.findings && results.findings.length > 0) {
+        html += `<h4 style="color: #e2e8f0; margin: 20px 0;">Findings:</h4>`;
+        results.findings.forEach(finding => {
+            html += `
+                <div class="finding ${finding.severity}">
+                    <span class="severity-badge severity-${finding.severity}">${finding.severity}</span>
+                    <p style="margin: 10px 0;"><strong>${finding.id || 'N/A'}</strong></p>
+                    <p>${finding.description}</p>
+                </div>
+            `;
+        });
+    } else {
+        html += `<div class="alert alert-info">No specific vulnerabilities found. This could indicate a secure configuration or limited scan scope.</div>`;
+    }
+    
+    html += `
+        <div style="margin-top: 20px; display: flex; gap: 15px;">
+            <a href="/download/${filepath.split('/').pop()}" class="btn">💾 Download Results</a>
+            <button onclick="getAIAnalysis()" class="btn" id="aiAnalyzeBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">🤖 AI Analysis</button>
+        </div>
+        
+        <div id="aiAnalysisSection" style="display: none; margin-top: 30px;">
+            <h3 style="color: #e2e8f0; margin-bottom: 20px;">🤖 AI-Powered Analysis</h3>
+            <div id="aiAnalysisContent"></div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    window.currentScanResults = results;
+}
+
+async function getAIAnalysis() {
+    const btn = document.getElementById('aiAnalyzeBtn');
+    const section = document.getElementById('aiAnalysisSection');
+    const content = document.getElementById('aiAnalysisContent');
+    
+    btn.disabled = true;
+    btn.textContent = '🔄 Analyzing...';
+    
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #94a3b8;">AI is analyzing your scan results...</p>
+        </div>
+    `;
+    section.style.display = 'block';
+    
+    try {
+        const response = await fetch('/api/analyze/nikto', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({results: window.currentScanResults})
+        });
+        
+        const analysis = await response.json();
+        
+        if (analysis.error) {
+            content.innerHTML = `
+                <div style="background: rgba(239, 83, 80, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef5350;">
+                    <p style="color: #ef5350; margin: 0;"><strong>❌ Error:</strong> ${sanitizeHTML(analysis.error)}</p>
+                </div>
+            `;
+        } else if (Object.keys(analysis).length === 0) {
+            content.innerHTML = `
+                <div style="background: rgba(255, 193, 7, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <p style="color: #ffc107; margin: 0;"><strong>⚠️ Warning:</strong> AI returned empty results. Please try again.</p>
+                </div>
+            `;
+        } else {
+            displayAIAnalysis(analysis);
+        }
+        
+        btn.textContent = '✅ Analysis Complete';
+    } catch (error) {
+        content.innerHTML = `
+            <div style="background: rgba(239, 83, 80, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef5350;">
+                <p style="color: #ef5350; margin: 0;"><strong>❌ Error:</strong> Failed to get AI analysis: ${sanitizeHTML(error.message)}</p>
+            </div>
+        `;
+        btn.textContent = '❌ Analysis Failed';
+        btn.disabled = false;
+    }
+}
+
+function sanitizeHTML(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function displayAIAnalysis(analysis) {
+    const content = document.getElementById('aiAnalysisContent');
+    
+    let html = `
+        <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 25px; border-radius: 12px; border: 1px solid rgba(102, 126, 234, 0.3); margin-bottom: 20px;">
+            <h4 style="color: #667eea; margin-bottom: 15px; font-size: 16px; font-weight: 600;">📝 Web Application Analysis</h4>
+            <p style="color: #e2e8f0; line-height: 1.8; font-size: 14px; margin: 0;">${sanitizeHTML(analysis.summary || 'No summary available')}</p>
+        </div>
+    `;
+    
+    if (analysis.overall_risk_level) {
+        const riskColors = { 'Low': '#38ef7d', 'Medium': '#ffc107', 'High': '#ff9800', 'Critical': '#ef5350' };
+        const riskColor = riskColors[analysis.overall_risk_level] || '#94a3b8';
+        const riskEmoji = { 'Low': '✅', 'Medium': '⚠️', 'High': '🔴', 'Critical': '🚨' };
+        html += `
+            <div style="background: rgba(255, 255, 255, 0.04); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid ${riskColor};">
+                <h4 style="color: ${riskColor}; margin: 0 0 5px 0; font-size: 16px; font-weight: 600;">${riskEmoji[analysis.overall_risk_level] || '◆'} Overall Risk Level: <strong>${analysis.overall_risk_level}</strong></h4>
+            </div>
+        `;
+    }
+    
+    if (analysis.critical_issues && analysis.critical_issues.length > 0) {
+        html += `
+            <div style="background: rgba(239, 83, 80, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(239, 83, 80, 0.3);">
+                <h4 style="color: #ef5350; margin-bottom: 15px; font-size: 16px; font-weight: 600;">⚠️ Critical Issues & Fixes (${analysis.critical_issues.length})</h4>
+        `;
+        analysis.critical_issues.forEach((item, index) => {
+            html += `
+                <div style="margin-bottom: 18px; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border-left: 3px solid #ef5350;">
+                    <p style="color: #ef5350; font-weight: 700; margin: 0 0 10px 0; font-size: 14px;">🔸 Issue ${index + 1}: ${sanitizeHTML(item.issue)}</p>
+                    <p style="color: #38ef7d; margin: 0 0 0 15px; font-size: 13px; line-height: 1.6;">
+                        <strong style="color: #38ef7d;">✓ Fix:</strong> ${sanitizeHTML(item.fix)}
+                    </p>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    }
+    
+    content.innerHTML = html;
+}
+</script>
+{% endblock %}

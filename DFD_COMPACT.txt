@@ -1,0 +1,103 @@
+================================================================================
+       CyberAuditX - DFD (Compact - Fits Half A4 Page)
+================================================================================
+
+LEVEL 0: CONTEXT DIAGRAM
+========================
+
+                    [USER]
+                      |
+        +--- Scan Request ----+
+        |                     |
+        |                     V
+   Results        +---------------------+
+        |         | CyberAuditX System  |
+        |         +---------------------+
+        |            |          |
+        |        Execute   Retrieve
+        |        Commands   Results
+        |            |          |
+        |            V          V
+        +--- [TARGET NETWORK] [DATABASE]
+
+External Entities: USER, TARGET NETWORK, DATABASE
+
+================================================================================
+
+LEVEL 1: PROCESSES & DATA STORES
+=================================
+
+[USER] --> P1: Input Validation
+              |
+              V
+         P2: Execute Scanner
+              |
+              V
+         P3: Parse & Store --> [D2: JSON Results]
+              |
+              +-> P4: AI Analysis
+                      |
+                      V
+                  P5: Export Report
+                      |
+                      V
+                    [USER]
+
+Data Stores:
+  D1: Scan Cache (memory)
+  D2: JSON Results (disk)
+
+================================================================================
+
+LEVEL 2: DETAILED BREAKDOWN
+============================
+
+P1: INPUT VALIDATION
+    Input: Target (URL/IP)
+    Process: Parse, validate, normalize
+    Output: Valid Target
+
+P2: EXECUTE SCANNER
+    Input: Valid Target + Scanner Type
+    Process: Run nmap/nikto/sqlmap, capture output
+    Output: Raw Command Output
+
+P3: PARSE RESULTS
+    Input: Raw Output
+    Process: Extract findings, categorize severity, create JSON
+    Output: Parsed Data -> Save to D2
+
+P4: AI ANALYSIS
+    Input: Parsed Data (from D2)
+    Process: Call Gemini API, extract JSON
+    Output: Analysis Results
+
+P5: EXPORT REPORT
+    Input: Parsed Data + AI Analysis
+    Process: Format and prepare report
+    Output: Report to User
+
+================================================================================
+
+DATA FLOW ARROWS
+================
+
+1. Target Input    -> P1
+2. Valid Target    -> P2
+3. Raw Output      -> P3
+4. Parsed Data     -> P4, P5
+5. Analysis Result -> P5
+6. Report          -> User
+7. Save            -> D2
+8. Retrieve        -> P4
+
+================================================================================
+
+LEGEND
+======
+
+[SQUARE]  = External Entity / Data Store
+[TEXT]    = Process (P1, P2, etc.)
+----->    = Data Flow (labeled)
+
+================================================================================

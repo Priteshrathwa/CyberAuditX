@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+
+{% block title %}Automated Scan - CyberAuditX{% endblock %}
+
+{% block content %}
+<h2 style="color: #1a1a2e; font-weight: 700; font-size: 32px; margin-bottom: 15px;">🤖 Automated Security Scan</h2>
+
+<div class="alert alert-info" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-left-color: #667eea;">
+    <strong style="font-size: 16px;">ℹ️ Automated Workflow:</strong> This scan runs <strong>Nmap → SQLMap → Nikto</strong> in sequence and provides live vulnerability updates.
+</div>
+
+<div class="scan-form">
+    <form id="automatedForm">
+        <div class="form-group">
+            <label for="target">Target URL or IP Address *</label>
+            <input type="text" id="target" name="target" placeholder="e.g., http://example.com or 192.168.1.1" required>
+            <small style="display: block; margin-top: 5px; color: #666;">
+                For URLs: Full scan (Nmap + SQLMap + Nikto)<br>
+                For IPs: Network scan (Nmap + Nikto if web ports found)
+            </small>
+        </div>
+        
+        <button type="submit" class="btn" id="scanBtn">🚀 Start Automated Scan</button>
+    </form>
+</div>
+
+<div id="scanProgress" style="display: none; margin-top: 40px;">
+    <h3 style="color: #ffffff; margin-bottom: 25px; font-weight: 600; font-size: 24px;">📊 Scan Progress</h3>
+    
+    <div class="card" style="padding: 30px;">
+        <div class="scan-step" id="step-nmap">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="step-icon" id="icon-nmap">⏳</div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 8px 0;">Step 1: Nmap Port Scan</h4>
+                    <p id="status-nmap" style="margin: 0;">Waiting...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scan-step" id="step-sqlmap">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="step-icon" id="icon-sqlmap">⏳</div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 8px 0;">Step 2: SQLMap Injection Test</h4>
+                    <p id="status-sqlmap" style="margin: 0;">Waiting...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scan-step" id="step-nikto">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="step-icon" id="icon-nikto">⏳</div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 8px 0;">Step 3: Nikto Web Scan</h4>
+                    <p id="status-nikto" style="margin: 0;">Waiting...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="vulnerabilitiesContainer" style="display: none; margin-top: 30px;">
+        <h3 style="color: #1a1a2e; margin-bottom: 25px; font-weight: 600; font-size: 24px;">🔍 Live Vulnerability Feed</h3>
+        <div id="vulnerabilitiesList" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 25px; border-radius: 15px; max-height: 500px; overflow-y: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">
+            <!-- Vulnerabilities will be added here dynamically -->
+        </div>
+    </div>
+</div>
+
+<div id="resultsContainer" style="display: none; margin-top: 40px;">
+    <h3 style="color: #1a1a2e; margin-bottom: 25px; font-weight: 600; font-size: 24px;">📋 Final Report</h3>
+    <div id="finalResults"></div>
+</div>
+
+<style>
+.step-icon {
+    font-size: 40px;
+    min-width: 50px;
+    text-align: center;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.1));
+}
+
+.vulnerability-item {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 18px;
+    margin: 12px 0;
+    border-radius: 12px;
+    color: #e2e8f0;
+    border-left: 4px solid;
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.vulnerability-item.critical {
+    border-left-color: #eb3349;
+    background: rgba(235, 51, 73, 0.15);
+}
+
+.vulnerability-item.high {
+    border-left-color: #f45c43;
+    background: rgba(244, 92, 67, 0.15);
+}
+
+.vulnerability-item.medium {
+    border-left-color: #feca57;
+    background: rgba(254, 202, 87, 0.15);
+}
+
+.vulnerability-item.low {
+    border-left-color: #48dbfb;
+    background: rgba(72, 219, 251, 0.15);
+}
+
+.vulnerability-item.info {
+    border-left-color: #95a5a6;
+    background: rgba(149, 165, 166, 0.15);
+}
+
+.scan-step {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 20px;
+    border-radius: 12px;
+    background: white;
+    margin-bottom: 15px;
+    border: 2px solid #e1e8ed;
+}
+
+.scan-step.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+    transform: scale(1.02);
+}
+
+.scan-step.completed {
+    opacity: 0.6;
+    background: rgba(56, 239, 125, 0.05);
+    border-color: #38ef7d;
+}
+
+.scan-step h4 {
+    color: #1a1a2e;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.scan-step p {
+    color: #718096;
+    font-weight: 500;
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let eventSource = null;
+
+document.getElementById('automatedForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const scanBtn = document.getElementById('scanBtn');
+    const scanProgress = document.getElementById('scanProgress');
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    // Reset UI
+    scanProgress.style.display = 'block';
+    resultsContainer.style.display = 'none';
+    scanBtn.disabled = true;
+    
+    // Reset step statuses
+    resetSteps();
+    
+    try {
+        // Start the scan
+        const response = await fetch('/scan/automated', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Error: ' + data.error);
+            scanBtn.disabled = false;
+            return;
+        }
+        
+        // Connect to SSE stream for live updates
+        eventSource = new EventSource(`/scan/automated/stream/${data.scan_id}`);
+        
+        eventSource.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            handleScanMessage(message);
+        };
+        
+        eventSource.onerror = function() {
+            console.log('SSE connection closed');
+            eventSource.close();
+            scanBtn.disabled = false;
+        };
+        
+    } catch (error) {
+        alert('Error starting scan: ' + error.message);
+        scanBtn.disabled = false;
+    }
+});
+
+function resetSteps() {
+    ['nmap', 'sqlmap', 'nikto'].forEach(step => {
+        document.getElementById(`icon-${step}`).textContent = '⏳';
+        document.getElementById(`status-${step}`).textContent = 'Waiting...';
+        document.getElementById(`step-${step}`).className = 'scan-step';
+    });
+    
+    document.getElementById('vulnerabilitiesList').innerHTML = '';
+    document.getElementById('vulnerabilitiesContainer').style.display = 'none';
+}
+
+function handleScanMessage(message) {
+    const type = message.type;
+    
+    if (type === 'status') {
+        updateStepStatus(message.step, message.message);
+    } else if (type === 'vulnerability') {
+        addVulnerability(message);
+    } else if (type === 'error') {
+        if (message.step) {
+            updateStepError(message.step, message.message);
+        } else {
+            alert('Scan error: ' + message.message);
+        }
+    } else if (type === 'complete') {
+        showFinalResults(message);
+        if (eventSource) {
+            eventSource.close();
+        }
+        document.getElementById('scanBtn').disabled = false;
+    }
+}
+
+function updateStepStatus(step, status) {
+    const statusElement = document.getElementById(`status-${step}`);
+    const iconElement = document.getElementById(`icon-${step}`);
+    const stepElement = document.getElementById(`step-${step}`);
+    
+    if (statusElement) {
+        statusElement.textContent = status;
+        
+        if (status.startsWith('Starting')) {
+            iconElement.textContent = '🔄';
+            stepElement.className = 'scan-step active';
+        } else if (status.includes('completed') || status.includes('Skipping')) {
+            iconElement.textContent = '✅';
+            stepElement.className = 'scan-step completed';
+        }
+    }
+}
+
+function updateStepError(step, message) {
+    const iconElement = document.getElementById(`icon-${step}`);
+    const statusElement = document.getElementById(`status-${step}`);
+    
+    if (iconElement && statusElement) {
+        iconElement.textContent = '❌';
+        statusElement.textContent = message;
+        statusElement.style.color = '#e74c3c';
+    }
+}
+
+function addVulnerability(vuln) {
+    const container = document.getElementById('vulnerabilitiesContainer');
+    const list = document.getElementById('vulnerabilitiesList');
+    
+    container.style.display = 'block';
+    
+    const item = document.createElement('div');
+    item.className = `vulnerability-item ${vuln.severity}`;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    
+    item.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span class="severity-badge severity-${vuln.severity}" style="margin-right: 10px;">
+                    ${vuln.severity.toUpperCase()}
+                </span>
+                <span style="color: #3498db; font-weight: bold;">[${vuln.tool}]</span>
+                <span style="margin-left: 10px;">${vuln.message}</span>
+            </div>
+            <span style="color: #95a5a6; font-size: 12px;">${timestamp}</span>
+        </div>
+    `;
+    
+    list.insertBefore(item, list.firstChild);
+}
+
+function showFinalResults(data) {
+    const container = document.getElementById('resultsContainer');
+    const resultsDiv = document.getElementById('finalResults');
+    
+    const results = data.results;
+    const totalVulns = results.vulnerabilities ? results.vulnerabilities.length : 0;
+    
+    let html = `
+        <div class="alert alert-success" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; box-shadow: 0 4px 20px rgba(17, 153, 142, 0.3);">
+            <strong style="font-size: 18px;">✓ Scan Complete!</strong> All security checks finished successfully.
+        </div>
+        
+        <div class="card" style="padding: 30px; margin: 25px 0;">
+            <h4 style="color: #1a1a2e; margin-bottom: 20px; font-weight: 600; font-size: 20px;">Summary</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div style="padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 12px; border-left: 4px solid #667eea;">
+                    <div style="font-size: 32px; font-weight: 700; color: #667eea; margin-bottom: 5px;">${totalVulns}</div>
+                    <div style="color: #718096; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Total Issues</div>
+                </div>
+                <div style="padding: 20px; background: rgba(0,0,0,0.02); border-radius: 12px; border-left: 4px solid #38ef7d;">
+                    <div style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px;">Target</div>
+                    <div style="color: #718096; font-size: 14px; word-break: break-all;">${results.target}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (totalVulns > 0) {
+        html += `
+            <div class="card" style="background: linear-gradient(135deg, rgba(235, 51, 73, 0.05) 0%, rgba(244, 92, 67, 0.05) 100%); border-left: 5px solid #eb3349; padding: 30px;">
+                <h4 style="color: #eb3349; margin-bottom: 20px; font-weight: 600; font-size: 20px;">⚠️ Security Issues Detected</h4>
+                <ul style="margin: 0; padding-left: 25px; line-height: 2;">
+        `;
+        
+        results.vulnerabilities.forEach(vuln => {
+            html += `<li style="margin: 12px 0; color: #4a5568;"><strong style="color: #eb3349;">[${vuln.tool}]</strong> <span class="severity-badge severity-${vuln.severity.toLowerCase()}">${vuln.severity.toUpperCase()}</span> ${vuln.description}</li>`;
+        });
+        
+        html += `
+                </ul>
+            </div>
+        `;
+    } else {
+        html += `
+            <div class="alert alert-success" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; box-shadow: 0 4px 20px rgba(17, 153, 142, 0.3);">
+                <strong style="font-size: 18px;">✓ No Critical Vulnerabilities Found</strong><br>
+                <span style="font-weight: 400;">The automated scan did not detect any major security issues. However, this doesn't guarantee complete security.</span>
+            </div>
+        `;
+    }
+    
+    html += `
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <a href="/download/${data.filepath}" class="btn" style="text-decoration: none; flex: 1; text-align: center;">💾 Download Full Report</a>
+            <button onclick="getAIAnalysis()" class="btn" id="aiAnalyzeBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); flex: 1;">🤖 AI Analysis</button>
+            <button onclick="location.reload()" class="btn" style="background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); flex: 1; box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);">🔄 New Scan</button>
+        </div>
+        
+        <div id="aiAnalysisSection" style="display: none; margin-top: 30px; padding: 25px; background: rgba(102, 126, 234, 0.05); border-radius: 12px; border: 1px solid rgba(102, 126, 234, 0.2);">
+            <h3 style="color: #667eea; margin-bottom: 20px;">🤖 AI-Powered Executive Analysis</h3>
+            <div id="aiAnalysisContent"></div>
+        </div>
+    `;
+    
+    resultsDiv.innerHTML = html;
+    container.style.display = 'block';
+    
+    // Store results for AI analysis
+    window.currentCombinedResults = data.results;
+    
+    // Scroll to results
+    container.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function getAIAnalysis() {
+    const btn = document.getElementById('aiAnalyzeBtn');
+    const section = document.getElementById('aiAnalysisSection');
+    const content = document.getElementById('aiAnalysisContent');
+    
+    btn.disabled = true;
+    btn.textContent = '🔄 Analyzing...';
+    
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #94a3b8;">AI is performing comprehensive analysis...</p>
+        </div>
+    `;
+    section.style.display = 'block';
+    
+    try {
+        const response = await fetch('/api/analyze/combined', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({results: window.currentCombinedResults})
+        });
+        
+        const analysis = await response.json();
+        
+        if (analysis.error) {
+            content.innerHTML = `
+                <div style="background: rgba(239, 83, 80, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef5350;">
+                    <p style="color: #ef5350; margin: 0;"><strong>❌ Error:</strong> ${sanitizeHTML(analysis.error)}</p>
+                </div>
+            `;
+        } else if (Object.keys(analysis).length === 0) {
+            content.innerHTML = `
+                <div style="background: rgba(255, 193, 7, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <p style="color: #ffc107; margin: 0;"><strong>⚠️ Warning:</strong> AI returned empty results. Please try again.</p>
+                </div>
+            `;
+        } else {
+            displayAIAnalysis(analysis);
+        }
+        
+        btn.textContent = '✅ Analysis Complete';
+    } catch (error) {
+        content.innerHTML = `
+            <div style="background: rgba(239, 83, 80, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef5350;">
+                <p style="color: #ef5350; margin: 0;"><strong>❌ Error:</strong> Failed to get AI analysis: ${sanitizeHTML(error.message)}</p>
+            </div>
+        `;
+        btn.textContent = '❌ Analysis Failed';
+        btn.disabled = false;
+    }
+}
+
+function sanitizeHTML(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function displayAIAnalysis(analysis) {
+    const content = document.getElementById('aiAnalysisContent');
+    
+    let html = `
+        <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); padding: 25px; border-radius: 12px; margin-bottom: 20px;">
+            <h4 style="color: #667eea; margin-bottom: 15px; font-size: 16px; font-weight: 600;">📋 Executive Summary</h4>
+            <p style="color: #e2e8f0; line-height: 1.8; font-size: 14px; margin: 0;">${sanitizeHTML(analysis.executive_summary || 'No summary available')}</p>
+        </div>
+    `;
+    
+    if (analysis.risk_score !== undefined) {
+        const riskColor = analysis.risk_score > 70 ? '#ef5350' : analysis.risk_score > 40 ? '#ff9800' : '#38ef7d';
+        const riskLevel = analysis.risk_score > 70 ? 'CRITICAL' : analysis.risk_score > 40 ? 'HIGH' : 'MEDIUM';
+        const riskEmoji = analysis.risk_score > 70 ? '🚨' : analysis.risk_score > 40 ? '⚠️' : '✅';
+        html += `
+            <div style="background: rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid ${riskColor};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="color: ${riskColor}; margin: 0; font-size: 16px; font-weight: 600;">${riskEmoji} Risk Score</h4>
+                    <span style="color: ${riskColor}; font-size: 28px; font-weight: 700;">${analysis.risk_score}/100</span>
+                </div>
+                <p style="color: #94a3b8; line-height: 1.6; font-size: 13px; margin: 0; padding: 10px 0 0 0; border-top: 1px solid rgba(255,255,255,0.1);">${sanitizeHTML(analysis.risk_justification || '')}</p>
+            </div>
+        `;
+    }
+    
+    if (analysis.critical_actions && analysis.critical_actions.length > 0) {
+        html += `
+            <div style="background: rgba(239, 83, 80, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(239, 83, 80, 0.3); margin-bottom: 20px;">
+                <h4 style="color: #ef5350; margin-bottom: 15px; font-size: 16px; font-weight: 600;">⚡ Critical Actions Required (${analysis.critical_actions.length})</h4>
+                <ol style="color: #e2e8f0; line-height: 2; margin: 0 0 0 25px; padding: 0; font-size: 14px;">
+                    ${analysis.critical_actions.map(action => `<li style="margin-bottom: 8px;"><strong>${sanitizeHTML(action)}</strong></li>`).join('')}
+                </ol>
+            </div>
+        `;
+    }
+    
+    if (analysis.compliance_concerns && analysis.compliance_concerns.length > 0) {
+        html += `
+            <div style="background: rgba(255, 193, 7, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 193, 7, 0.3); margin-bottom: 20px;">
+                <h4 style="color: #ffc107; margin-bottom: 15px; font-size: 16px; font-weight: 600;">⚖️ Compliance Concerns (${analysis.compliance_concerns.length})</h4>
+                <ul style="color: #e2e8f0; line-height: 2; margin: 0 0 0 25px; padding: 0; font-size: 14px;">
+                    ${analysis.compliance_concerns.map(concern => `<li style="margin-bottom: 8px;">${sanitizeHTML(concern)}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    if (analysis.roadmap) {
+        html += `
+            <div style="background: rgba(56, 239, 125, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(56, 239, 125, 0.3);">
+                <h4 style="color: #38ef7d; margin-bottom: 20px; font-size: 16px; font-weight: 600;">🗺️ Security Roadmap</h4>
+        `;
+        
+        if (analysis.roadmap.immediate && analysis.roadmap.immediate.length > 0) {
+            html += `
+                <div style="margin-bottom: 18px; padding: 15px; background: rgba(239, 83, 80, 0.1); border-radius: 8px; border-left: 3px solid #ef5350;">
+                    <h5 style="color: #ef5350; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">🔥 Immediate (0-7 days)</h5>
+                    <ul style="color: #e2e8f0; margin: 0 0 0 20px; padding: 0; font-size: 13px; line-height: 1.8;">
+                        ${analysis.roadmap.immediate.map(item => `<li style="margin-bottom: 6px;">${sanitizeHTML(item)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        if (analysis.roadmap.short_term && analysis.roadmap.short_term.length > 0) {
+            html += `
+                <div style="margin-bottom: 18px; padding: 15px; background: rgba(255, 152, 0, 0.1); border-radius: 8px; border-left: 3px solid #ff9800;">
+                    <h5 style="color: #ff9800; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">📅 Short-term (1-4 weeks)</h5>
+                    <ul style="color: #e2e8f0; margin: 0 0 0 20px; padding: 0; font-size: 13px; line-height: 1.8;">
+                        ${analysis.roadmap.short_term.map(item => `<li style="margin-bottom: 6px;">${sanitizeHTML(item)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        if (analysis.roadmap.long_term && analysis.roadmap.long_term.length > 0) {
+            html += `
+                <div style="padding: 15px; background: rgba(56, 239, 125, 0.1); border-radius: 8px; border-left: 3px solid #38ef7d;">
+                    <h5 style="color: #38ef7d; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">🎯 Long-term (1-3 months)</h5>
+                    <ul style="color: #e2e8f0; margin: 0 0 0 20px; padding: 0; font-size: 13px; line-height: 1.8;">
+                        ${analysis.roadmap.long_term.map(item => `<li style="margin-bottom: 6px;">${sanitizeHTML(item)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+    }
+    
+    content.innerHTML = html;
+}
+</script>
+{% endblock %}
